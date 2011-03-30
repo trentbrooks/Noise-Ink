@@ -1,6 +1,9 @@
 SOFTWARE
 Built in Processing, 'Noise Ink' is a pseudo 2D fluid/ink animation system which responds to body movement via a Kinect camera. A combination of optical flow and perlin noise control the visuals.
 
+test <img src="https://github.com/JohnAlbin/succinct-for-colloquy/raw/master/screenshot.png" width="800" alt="Screenshot" />
+
+
 PROJECTS
 Auckland Arts Festival- http://vimeo.com/21620801
 
