@@ -2,7 +2,7 @@
 ## About ##
 'Noise Ink' is a pseudo 2D fluid/ink animation system which responds to body movement via a Kinect camera. A combination of optical flow and perlin noise control the visuals. 
 
-Setup video: [http://vimeo.com/21691884](http://vimeo.com/21691884).
+Setup video: [http://vimeo.com/21691884](http://vimeo.com/21691884)
 
 A version of 'Noise Ink' was recently used at the Auckland Arts Festival: [http://vimeo.com/21620801](http://vimeo.com/21620801)
 
