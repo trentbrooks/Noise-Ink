@@ -45,7 +45,7 @@ class Kinecter {
       kinect.enableDepth(true);
       kinect.tilt(kAngle);
 
-      kinect.processDepthImage(true);
+      kinect.processDepthImage(false);
 
       isKinected = true;
       println("KINECT IS INITIALISED");

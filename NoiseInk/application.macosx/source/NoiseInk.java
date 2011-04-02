@@ -23,6 +23,7 @@ import java.util.regex.*;
 
 public class NoiseInk extends PApplet {
 
+// UPDATED: 2nd April 2011
 /**
  * NOISE INK
  * Created by Trent Brooks, http://www.trentbrooks.com
@@ -160,7 +161,7 @@ public void instructionScreen()
 
 public void keyPressed() {
   println("*** FRAMERATE: " + frameRate);
-  println(keyCode);
+
   if (keyCode == UP) {
     kinecter.kAngle++;
     kinecter.kAngle = constrain(kinecter.kAngle, 0, 30);
@@ -212,6 +213,7 @@ public void keyPressed() {
     kinecter.maxDepth = constrain(kinecter.maxDepth - 10, 0, kinecter.thresholdRange);
     println("maximum depth: " + kinecter.maxDepth);
   }
+
 }
 
 public void stop() {
@@ -266,7 +268,7 @@ class Kinecter {
       kinect.enableDepth(true);
       kinect.tilt(kAngle);
 
-      kinect.processDepthImage(true);
+      kinect.processDepthImage(false);
 
       isKinected = true;
       println("KINECT IS INITIALISED");
@@ -324,17 +326,19 @@ class Kinecter {
  *
  *
  **/
- 
+
 /**
  * MODIFICATIONS TO HIDETOSHI'S OPTICAL FLOW
  * modified to use kinect camera image & optimised a fair bit as rgb calculations are not required - still needs work.
  * note class requires depth image from kinecter: kinecter.depthImg
  *
-**/
+ **/
 
 class OpticalFlow {
-
-  float minFlowVelocity = 20.0f;
+  
+  // setting both to the same value is intereseting
+  float minDrawParticlesFlowVelocity = 20.0f;
+  float minRegisterFlowVelocity = 2.0f;
 
   // A flow field is a two dimensional array of PVectors
   PVector[][] field;
@@ -429,7 +433,7 @@ class OpticalFlow {
     difT();
     difXY();
     solveFlow();
-    drawColorFlow();
+    //drawColorFlow();
   }
 
   // calculate average pixel value (r,g,b) for rectangle region
@@ -526,7 +530,7 @@ class OpticalFlow {
   }
 
   // solve optical flow by least squares (regression analysis)
-  public void solveflow(int ig) {
+  public void solveSectFlow(int ig) {
     float xx, xy, yy, xt, yt;
     float a,u,v,w;
 
@@ -588,13 +592,7 @@ class OpticalFlow {
     }
   }
 
-  /*
-  int x0Z;
-   int igZ;
-   float uZ;
-   float vZ;
-   float aZ;
-   */
+
 
   // 3rd sweep : solving optical flow
   public void solveFlow() {
@@ -619,7 +617,7 @@ class OpticalFlow {
 
         // solve for (flowx, flowy) such that
         // fx flowx + fy flowy + ft = 0
-        solveflow(ig);
+        solveSectFlow(ig);
 
         // smoothing
         sflowx[ig]+=(flowx[ig]-sflowx[ig])*wflow;
@@ -631,33 +629,36 @@ class OpticalFlow {
         //float v=df*sflowy[ig];
 
         float a=sqrt(u*u+v*v);
-        if(a>=2.0f) field[ix][iy] = new PVector(u,v);
-        /*
-        if(a>=minFlowVelocity)
-         {
-         if(a>=2.0) field[ix][iy] = new PVector(u,v);
-         
-         if (flagflow) 
-         {
-         stroke(255.0f);
-         line(x0,y0,x0+u,y0+v);
-         }
-         
-         
-         // same as mouse mover
-         float mouseNormX = (x0+u) * invKWidth;// / kWidth;
-         float mouseNormY = (y0+v) * invKHeight; // kHeight;
-         float mouseVelX = ((x0+u) - x0) * invKWidth;// / kWidth;
-         float mouseVelY = ((y0+v) - y0) * invKHeight;// / kHeight;
-         
-         noiseWorld.addForce(1-mouseNormX, mouseNormY, -mouseVelX, mouseVelY); 
-         }
-         */
+
+        // register new vectors
+        if(a>= minRegisterFlowVelocity) 
+        {
+          field[ix][iy] = new PVector(u,v);
+
+          // REMOVED FROM drawColorFlow() to here
+          if(a>=minDrawParticlesFlowVelocity) { 
+            
+            // display flow when debugging
+            if (drawOpticalFlow) 
+            {
+              stroke(255.0f, 0.0f, 0.0f);
+              line(x0,y0,x0+u,y0+v);
+            } 
+
+            // same syntax as memo's fluid solver (http://memo.tv/msafluid_for_processing)
+            float mouseNormX = (x0+u) * invKWidth;// / kWidth;
+            float mouseNormY = (y0+v) * invKHeight; // kHeight;
+            float mouseVelX = ((x0+u) - x0) * invKWidth;// / kWidth;
+            float mouseVelY = ((y0+v) - y0) * invKHeight;// / kHeight;         
+
+            particleManager.addForce(1-mouseNormX, mouseNormY, -mouseVelX, mouseVelY);
+          }
+        }
       }
     }
   }
 
-  // 5th sweep : draw the flow
+  // dont need to seperate from solveFlow
   public void drawColorFlow() {
     for(int ix=0;ix<cols;ix++) {
       int x0=ix*resolution+resolution/2;
@@ -672,7 +673,7 @@ class OpticalFlow {
         // draw the line segments for optical flow
         float a=sqrt(u*u+v*v);
         //if(a>=2.0) { // draw only if the length >=2.0
-        if(a>=minFlowVelocity) { // draw only if the length >=2.0
+        if(a>=minRegisterFlowVelocity) { // draw only if the length >=2.0
           //float r=0.5*(1.0+u/(a+0.1));
           //float g=0.5*(1.0+v/(a+0.1));
           //float b=0.5*(2.0-(r+g));
@@ -733,15 +734,6 @@ class OpticalFlow {
   }
 
 
-
-  public PVector lookup2(PVector lookup) {
-    //lookup.normalize();
-    lookup.x *= kWidth;
-    lookup.y *= kHeight;
-    int i = (int) constrain(lookup.x/resolution,0,cols-1);
-    int j = (int) constrain(lookup.y/resolution,0,rows-1);
-    return field[i][j].get();
-  }
 }
 
 /**

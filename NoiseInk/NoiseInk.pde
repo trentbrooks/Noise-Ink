@@ -1,3 +1,4 @@
+// UPDATED: 2nd April 2011
 /**
  * NOISE INK
  * Created by Trent Brooks, http://www.trentbrooks.com
@@ -135,7 +136,7 @@ void instructionScreen()
 
 void keyPressed() {
   println("*** FRAMERATE: " + frameRate);
-  println(keyCode);
+
   if (keyCode == UP) {
     kinecter.kAngle++;
     kinecter.kAngle = constrain(kinecter.kAngle, 0, 30);
@@ -187,6 +188,7 @@ void keyPressed() {
     kinecter.maxDepth = constrain(kinecter.maxDepth - 10, 0, kinecter.thresholdRange);
     println("maximum depth: " + kinecter.maxDepth);
   }
+
 }
 
 void stop() {
