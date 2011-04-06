@@ -23,7 +23,7 @@ import java.util.regex.*;
 
 public class NoiseInk extends PApplet {
 
-// UPDATED: 2nd April 2011
+// UPDATED: 7th April 2011
 /**
  * NOISE INK
  * Created by Trent Brooks, http://www.trentbrooks.com
@@ -113,11 +113,11 @@ public void draw() {
   // fades black rectangle over the top
   easyFade();
 
-  // updates the kinect raw depth image
-  kinecter.updateKinectDepth();
-
   if(showSettings) 
   {    
+    // updates the kinect raw depth + pixels
+    kinecter.updateKinectDepth(true);
+    
     // display instructions for adjusting kinect depth image
     instructionScreen();
 
@@ -126,6 +126,9 @@ public void draw() {
   }
   else
   {
+    // updates the kinect raw depth
+    kinecter.updateKinectDepth(false);
+    
     // updates the optical flow vectors from the kinecter depth image (want to update optical flow before particles)
     flowfield.update();
     particleManager.updateAndRenderGL();
@@ -279,9 +282,10 @@ class Kinecter {
     }
 
     depthImg = new PImage(kWidth, kHeight);
+    rawDepth = new int[kWidth*kHeight];
   }
 
-  public void updateKinectDepth()
+  public void updateKinectDepth(boolean updateDepthPixels)
   {
     if(!isKinected) return;
 
@@ -289,17 +293,20 @@ class Kinecter {
     rawDepth = kinect.getRawDepth();
     for (int i=0; i < kWidth*kHeight; i++) {
       if (rawDepth[i] >= minDepth && rawDepth[i] <= maxDepth) {
-        depthImg.pixels[i] = 0xFFFFFFFF;
+        if(updateDepthPixels) depthImg.pixels[i] = 0xFFFFFFFF;
+        rawDepth[i] = 255;
       } 
       else {
-        depthImg.pixels[i] = 0;
+        if(updateDepthPixels) depthImg.pixels[i] = 0;
+        rawDepth[i] = 0;
       }
     }
 
     // update the thresholded image
-    depthImg.updatePixels();
+    if(updateDepthPixels) depthImg.updatePixels();
     //image(depthImg, kWidth, 0);
   }
+  
 
   public void quit()
   {
@@ -454,8 +461,12 @@ class OpticalFlow {
     sumg = 0.0f;
     for(int y=y1; y<=y2; y++) {
       for(int i=kWidth*y+x1; i<=kWidth*y+x2; i++) {
-        pix= kinecter.depthImg.pixels[i];
-        g = pix & 0xFF; // grey
+        
+        // old method use depth image
+        //pix= kinecter.depthImg.pixels[i];
+        //g = pix & 0xFF; // grey
+        //sumg += g;
+        
         //b=pix & 0xFF; // blue
         // pix = pix >> 8;
         //g=pix & 0xFF; // green
@@ -466,8 +477,11 @@ class OpticalFlow {
         //sumr += b;//r;//g;//r;
         //sumg += b;//r;//g;
         //sumb += b;//r;//g;//b;
+        
+        // WORK WITH RAW DEPTH INSTEAD
+       sumg += kinecter.rawDepth[i];
 
-        sumg += g;
+       
       }
     }
     n = (x2-x1+1)*(y2-y1+1); // number of pixels

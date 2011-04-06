@@ -56,9 +56,10 @@ class Kinecter {
     }
 
     depthImg = new PImage(kWidth, kHeight);
+    rawDepth = new int[kWidth*kHeight];
   }
 
-  public void updateKinectDepth()
+  public void updateKinectDepth(boolean updateDepthPixels)
   {
     if(!isKinected) return;
 
@@ -66,17 +67,20 @@ class Kinecter {
     rawDepth = kinect.getRawDepth();
     for (int i=0; i < kWidth*kHeight; i++) {
       if (rawDepth[i] >= minDepth && rawDepth[i] <= maxDepth) {
-        depthImg.pixels[i] = 0xFFFFFFFF;
+        if(updateDepthPixels) depthImg.pixels[i] = 0xFFFFFFFF;
+        rawDepth[i] = 255;
       } 
       else {
-        depthImg.pixels[i] = 0;
+        if(updateDepthPixels) depthImg.pixels[i] = 0;
+        rawDepth[i] = 0;
       }
     }
 
     // update the thresholded image
-    depthImg.updatePixels();
+    if(updateDepthPixels) depthImg.updatePixels();
     //image(depthImg, kWidth, 0);
   }
+  
 
   public void quit()
   {

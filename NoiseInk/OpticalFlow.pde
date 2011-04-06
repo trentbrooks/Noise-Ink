@@ -146,8 +146,12 @@ class OpticalFlow {
     sumg = 0.0;
     for(int y=y1; y<=y2; y++) {
       for(int i=kWidth*y+x1; i<=kWidth*y+x2; i++) {
-        pix= kinecter.depthImg.pixels[i];
-        g = pix & 0xFF; // grey
+        
+        // old method use depth image
+        //pix= kinecter.depthImg.pixels[i];
+        //g = pix & 0xFF; // grey
+        //sumg += g;
+        
         //b=pix & 0xFF; // blue
         // pix = pix >> 8;
         //g=pix & 0xFF; // green
@@ -158,8 +162,11 @@ class OpticalFlow {
         //sumr += b;//r;//g;//r;
         //sumg += b;//r;//g;
         //sumb += b;//r;//g;//b;
+        
+        // WORK WITH RAW DEPTH INSTEAD
+       sumg += kinecter.rawDepth[i];
 
-        sumg += g;
+       
       }
     }
     n = (x2-x1+1)*(y2-y1+1); // number of pixels

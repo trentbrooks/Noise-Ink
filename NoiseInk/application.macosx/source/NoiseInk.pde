@@ -1,4 +1,4 @@
-// UPDATED: 2nd April 2011
+// UPDATED: 7th April 2011
 /**
  * NOISE INK
  * Created by Trent Brooks, http://www.trentbrooks.com
@@ -88,11 +88,11 @@ void draw() {
   // fades black rectangle over the top
   easyFade();
 
-  // updates the kinect raw depth image
-  kinecter.updateKinectDepth();
-
   if(showSettings) 
   {    
+    // updates the kinect raw depth + pixels
+    kinecter.updateKinectDepth(true);
+    
     // display instructions for adjusting kinect depth image
     instructionScreen();
 
@@ -101,6 +101,9 @@ void draw() {
   }
   else
   {
+    // updates the kinect raw depth
+    kinecter.updateKinectDepth(false);
+    
     // updates the optical flow vectors from the kinecter depth image (want to update optical flow before particles)
     flowfield.update();
     particleManager.updateAndRenderGL();
