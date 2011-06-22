@@ -14,4 +14,4 @@ A version of 'Noise Ink' was recently used at the Auckland Arts Festival: [http:
 *   Patricio Gonzalez Vivo ([http://www.patriciogonzalezvivo.com](http://www.patriciogonzalezvivo.com)) & Hidetoshi Shimodaira (shimo@is.titech.ac.jp) for Optical Flow example ([http://www.openprocessing.org/visuals/?visualID=10435](http://www.openprocessing.org/visuals/?visualID=10435)).
 *   Memotv ([http://www.memo.tv/msafluid_for_processing](http://www.memo.tv/msafluid_for_processing)) for inspiration.
 
--Trent Brooks
+- Trent Brooks
